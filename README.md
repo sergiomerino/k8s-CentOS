@@ -50,11 +50,12 @@ Pasos a llevar a cabo:
 
 3.4 Reiniciando servicios para que cojan los cambios  MASTER
 
-for SERVICES in etcd kube-apiserver kube-controller-manager kube-scheduler; do 
-    sudo systemctl restart $SERVICES
-    sudo systemctl enable $SERVICES
-    sudo systemctl status $SERVICES 
-done
+
+		for SERVICES in etcd kube-apiserver kube-controller-manager kube-scheduler; do 
+		    sudo systemctl restart $SERVICES
+		    sudo systemctl enable $SERVICES
+		    sudo systemctl status $SERVICES 
+		done
 
 3.5 Definiendo la configuración de  flannel network en etcd. esta configuracion será descargada por el servicio flannel de los minions:
 	`etcdctl mk /coreos.com/network/config '{"Network":"172.17.0.0/16"}`
@@ -71,6 +72,7 @@ done
 
 4.4 Configurando el servicio de kubelet en los minions de etc/kubernetes/kubelet
 minion 1:
+
 	`KUBELET_ADDRESS="--address=0.0.0.0"`
 	`KUBELET_PORT="--port=10250"`
 	`# change the hostname to this host’s IP address`
@@ -79,6 +81,7 @@ minion 1:
 	`KUBELET_ARGS=""`
 
 minion 2:
+
 	`KUBELET_ADDRESS="--address=0.0.0.0"`
 	`KUBELET_PORT="--port=10250"`
 	`# change the hostname to this host’s IP address`
@@ -100,6 +103,7 @@ Arrancando los servicios en cada uno de los minions
 
 como resultado de esto, en cada minion deberia existir un par de interfaces de red docker0 y flannel0. deberia existir unos interfaces de red distintos para flannel en cada
 uno de los minions
+
 	`ip a | grep flannel | grep inet`
 
 
@@ -117,7 +121,7 @@ for SERVICES in etcd kube-apiserver kube-controller-manager kube-scheduler; do
     sudo systemctl stop  $SERVICES
  done
 
- for SERVICES in kube-proxy kubelet docker flanneld; do 
+for SERVICES in kube-proxy kubelet docker flanneld; do 
     sudo systemctl status $SERVICES 
 done
 
