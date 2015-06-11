@@ -71,36 +71,36 @@ done
 
 4.4 Configurando el servicio de kubelet en los minions de etc/kubernetes/kubelet
 minion 1:
-	KUBELET_ADDRESS="--address=0.0.0.0"
-	KUBELET_PORT="--port=10250"
-	# change the hostname to this host’s IP address
-	KUBELET_HOSTNAME="--hostname_override=192.168.132.142"
-	KUBELET_API_SERVER="--api_servers=http://192.168.132.141:8080"
-	KUBELET_ARGS=""
+	`KUBELET_ADDRESS="--address=0.0.0.0"`
+	`KUBELET_PORT="--port=10250"`
+	`# change the hostname to this host’s IP address`
+	`KUBELET_HOSTNAME="--hostname_override=192.168.132.142"`
+	`KUBELET_API_SERVER="--api_servers=http://192.168.132.141:8080"`
+	`KUBELET_ARGS=""`
 
 minion 2:
-	KUBELET_ADDRESS="--address=0.0.0.0"
-	KUBELET_PORT="--port=10250"
-	# change the hostname to this host’s IP address
-	KUBELET_HOSTNAME="--hostname_override=192.168.132.143"
-	KUBELET_API_SERVER="--api_servers=http://192.168.132.141:8080"
-	KUBELET_ARGS=""
+	`KUBELET_ADDRESS="--address=0.0.0.0"`
+	`KUBELET_PORT="--port=10250"`
+	`# change the hostname to this host’s IP address`
+	`KUBELET_HOSTNAME="--hostname_override=192.168.132.143"`
+	`KUBELET_API_SERVER="--api_servers=http://192.168.132.141:8080"`
+	`KUBELET_ARGS=""`
 
 En cada nodo hay que eliminar el interfaz de red docker0  
 
-sudo /sbin/ifconfig docker0 down
-sudo brctl delbr docker0
+`sudo /sbin/ifconfig docker0 down`
+`sudo brctl delbr docker0`
 
 Arrancando los servicios en cada uno de los minions
- for SERVICES in kube-proxy kubelet docker flanneld; do 
-    sudo systemctl restart $SERVICES
-    sudo systemctl enable $SERVICES
-    sudo systemctl status $SERVICES 
-done
+	 for SERVICES in kube-proxy kubelet docker flanneld; do 
+	    sudo systemctl restart $SERVICES
+	    sudo systemctl enable $SERVICES
+	    sudo systemctl status $SERVICES 
+	done
 
 como resultado de esto, en cada minion deberia existir un par de interfaces de red docker0 y flannel0. deberia existir unos interfaces de red distintos para flannel en cada
 uno de los minions
-ip a | grep flannel | grep inet
+	`ip a | grep flannel | grep inet`
 
 
 Como utilidad para el copy-paste... 
