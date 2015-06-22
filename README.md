@@ -18,16 +18,16 @@ Pasos a llevar a cabo:
 
 1.- Deshabilitar iptables en cada nodo para evitar conflictos con las reglas de iptables de Docker.
 
-		`sudo systemctl stop firewalld`
-		`sudo systemctl disable firewalld`
+		sudo systemctl stop firewalld
+		sudo systemctl disable firewalld
 		
 2.- Instalar NTP y asegurar que esta activo y corriendo.
-  `sudo yum -y install ntp`
-  `sudo systemctl start ntpd`
-  `sudo systemctl enable ntpd`
+		  sudo yum -y install ntp
+		  sudo systemctl start ntpd
+		  sudo systemctl enable ntpd
   
 3.- Instalar k8s en el nodo MASTER
-	`yum -y install etcd kubernetes`
+		yum -y install etcd kubernetes
 
 3.1- Configura etcd en MASTER para que escuche de todas las ips. revisar el fichero etcd.conf con objeto de que las siguientes lineas estén descomentadas.
 
@@ -51,64 +51,65 @@ Pasos a llevar a cabo:
 3.4 Reiniciando servicios para que cojan los cambios  MASTER
 
 
-		`for SERVICES in etcd kube-apiserver kube-controller-manager kube-scheduler; do `
-		 `   sudo systemctl restart $SERVICES`
-		 `   sudo systemctl enable $SERVICES`
-		 `   sudo systemctl status $SERVICES`
-		`done`
+		for SERVICES in etcd kube-apiserver kube-controller-manager kube-scheduler; do 
+		    sudo systemctl restart $SERVICES
+		    sudo systemctl enable $SERVICES
+		    sudo systemctl status $SERVICES
+		done
 
 3.5 Definiendo la configuración de  flannel network en etcd. esta configuracion será descargada por el servicio flannel de los minions:
 
-		`etcdctl mk /coreos.com/network/config '{"Network":"172.17.0.0/16"}`
+		etcdctl mk /coreos.com/network/config '{"Network":"172.17.0.0/16"}
 
 4 Configurando los minions - los siguientes pasos deben ser ejecutados en todos los minions que forman parte del cluster
 4.1 Instalando flannel y kubernetes usando yum
-		`sudo yum -y install flannel kubernetes`
+
+		sudo yum -y install flannel kubernetes
 
 4.2 Configurando el servicio etcd para el servicio de flannel. Hay que actualizar la siguiente linea en el fichero /etc/sysconfig/flanneld para conectar con master:
 
-	`FLANNEL_ETCD="http://192.168.132.141:4001"`
+	FLANNEL_ETCD="http://192.168.132.141:4001"
 
 4.3 configurando el servicio de configuración /etc/kubernetes/config de kubernetes para actualizar el valor del KUBE_MASTER
 
-	`KUBE_MASTER="--master=http://192.168.132.141:8080"`
+	KUBE_MASTER="--master=http://192.168.132.141:8080
 
 4.4 Configurando el servicio de kubelet en los minions de etc/kubernetes/kubelet
 minion 1:
 
-	`KUBELET_ADDRESS="--address=0.0.0.0"`
-	`KUBELET_PORT="--port=10250"`
-	`# change the hostname to this host’s IP address`
-	`KUBELET_HOSTNAME="--hostname_override=192.168.132.142"`
-	`KUBELET_API_SERVER="--api_servers=http://192.168.132.141:8080"`
-	`KUBELET_ARGS=""`
+	KUBELET_ADDRESS="--address=0.0.0.0"
+	KUBELET_PORT="--port=10250"
+	# change the hostname to this host’s IP address
+	KUBELET_HOSTNAME="--hostname_override=192.168.132.142"
+	KUBELET_API_SERVER="--api_servers=http://192.168.132.141:8080"
+	KUBELET_ARGS=""
 
 minion 2:
 
-	`KUBELET_ADDRESS="--address=0.0.0.0"`
-	`KUBELET_PORT="--port=10250"`
-	`# change the hostname to this host’s IP address`
-	`KUBELET_HOSTNAME="--hostname_override=192.168.132.143"`
-	`KUBELET_API_SERVER="--api_servers=http://192.168.132.141:8080"`
-	`KUBELET_ARGS=""`
+	KUBELET_ADDRESS="--address=0.0.0.0"
+	KUBELET_PORT="--port=10250"
+	# change the hostname to this host’s IP address
+	KUBELET_HOSTNAME="--hostname_override=192.168.132.143"
+	KUBELET_API_SERVER="--api_servers=http://192.168.132.141:8080"
+	KUBELET_ARGS=""
 
 En cada nodo hay que eliminar el interfaz de red docker0  
-
-`sudo /sbin/ifconfig docker0 down`
-`sudo brctl delbr docker0`
+		
+		sudo /sbin/ifconfig docker0 down
+		sudo brctl delbr docker0
 
 Arrancando los servicios en cada uno de los minions
 
-	 `for SERVICES in kube-proxy kubelet docker flanneld; do `
-	 `   sudo systemctl restart $SERVICES`
-	 `   sudo systemctl enable $SERVICES `
-	 `   sudo systemctl status $SERVICES `
-	`done `
+	 for SERVICES in kube-proxy kubelet docker flanneld; do 
+	    sudo systemctl restart $SERVICES
+	    sudo systemctl enable $SERVICES 
+	    sudo systemctl status $SERVICES 
+	  done 
 
 como resultado de esto, en cada minion deberia existir un par de interfaces de red docker0 y flannel0. deberia existir unos interfaces de red distintos para flannel en cada
 uno de los minions
 
-	`ip a | grep flannel | grep inet`
+	ip a | grep flannel | grep inet
 
 
 Como utilidad para el copy-paste... 
@@ -116,28 +117,28 @@ Como utilidad para el copy-paste...
 
 parando los servicios de un nodo worker
  
- `for SERVICES in kube-proxy kubelet docker flanneld; do `
- `   sudo systemctl stop $SERVICES`
- `done `
+ 	for SERVICES in kube-proxy kubelet docker flanneld; do 
+ 	   sudo systemctl stop $SERVICES
+ 	done 
 
 
 parando los servicios del master
 
-	`for SERVICES in etcd kube-apiserver kube-controller-manager kube-scheduler; do `
-	`    sudo systemctl stop  $SERVICES `
-	` done `
+	for SERVICES in etcd kube-apiserver kube-controller-manager kube-scheduler; do 
+	    sudo systemctl stop  $SERVICES 
+	 done 
 
-	`for SERVICES in kube-proxy kubelet docker flanneld; do `
-	`    sudo systemctl status $SERVICES `
-	`done `
+	for SERVICES in kube-proxy kubelet docker flanneld; do 
+	    sudo systemctl status $SERVICES 
+	done 
 
-	`for SERVICES in flanneld; do `
-	`    sudo systemctl restart $SERVICES `
-	`done`
+	for SERVICES in flanneld; do 
+	    sudo systemctl restart $SERVICES 
+	done
 
 
 Para probar que todo esta corriendo
 ---------------------------------
 
-	`kubectl create -f mysql.yaml`
-	`kubectl create -f mysql-service.yaml`
+	kubectl create -f mysql.yaml
+	kubectl create -f mysql-service.yaml
